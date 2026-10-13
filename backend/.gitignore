@@ -1,0 +1,38 @@
+# ========================================================
+# Backend .gitignore
+# ========================================================
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment Variables & Secrets (CRITICAL)
+.env
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Logs
+logs/
+*.log
+
+# Testing & Coverage
+coverage/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,48 @@
+# Pre-commit hooks configuration
+# Install with: npx husky install
+
+repos:
+  - repo: local
+    hooks:
+      # Backend hooks
+      - id: backend-typescript
+        name: Backend TypeScript Check
+        entry: bash -c 'cd backend && npx tsc --noEmit'
+        language: system
+        files: ^backend/src/.*\.ts$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: backend-eslint
+        name: Backend ESLint
+        entry: bash -c 'cd backend && npx eslint src --ext .ts'
+        language: system
+        files: ^backend/src/.*\.ts$
+        pass_filenames: false
+        stages: [commit]
+
+      # Frontend hooks
+      - id: frontend-typescript
+        name: Frontend TypeScript Check
+        entry: bash -c 'cd frontend && npx tsc --noEmit'
+        language: system
+        files: ^frontend/src/.*\.(ts|tsx)$
+        pass_filenames: false
+        stages: [commit]
+
+      - id: frontend-eslint
+        name: Frontend ESLint
+        entry: bash -c 'cd frontend && npx eslint . --ext .js,.jsx,.ts,.tsx'
+        language: system
+        files: ^frontend/(src|pages)/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+        stages: [commit]
+
+      # General hooks
+      - id: prettier
+        name: Prettier Format Check
+        entry: bash -c 'npx prettier --check .'
+        language: system
+        files: \.(ts|tsx|js|jsx|json|md|yml|yaml)$
+        pass_filenames: false
+        stages: [commit]

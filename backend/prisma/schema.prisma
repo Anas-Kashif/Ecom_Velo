@@ -1,0 +1,162 @@
+// Prisma Schema for E-Commerce
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS / CUSTOMERS
+// ============================================
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  phone     String?
+  status    String    @default("ACTIVE")
+  
+  orders    Order[]
+  reviews   Review[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// ============================================
+// PRODUCTS & CATEGORIES
+// ============================================
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  
+  products    Product[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String
+  price       Float
+  cost        Float
+  stock       Int
+  categoryId  String
+  image       String?
+  sku         String    @unique
+  status      String    @default("DRAFT")
+  
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderItems  OrderItem[]
+  reviews     Review[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+// ============================================
+// ORDERS
+// ============================================
+model Order {
+  id              String    @id @default(cuid())
+  orderNumber     String    @unique
+  userId          String?
+  guestEmail      String?
+  guestName       String?
+  status          String    @default("PENDING")
+  paymentStatus   String    @default("UNPAID")
+  paymentMethod   String?   @default("card")
+  totalAmount     Float
+  shippingAttn    String?   // First Name /Attention
+  shippingName    String?   // Last Name
+  shippingAddress String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZipCode String?
+  shippingCountry String?   @default("United States")
+  shippingCost    Float?    @default(0)
+  shippingMethod  String?
+  tax             Float?    @default(0)
+  notes           String?   // Store JSON data like lastFourDigits, etc
+  
+  user            User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([guestEmail])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String    @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  
+  createdAt DateTime  @default(now())
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}
+
+// ============================================
+// REVIEWS & RATINGS
+// ============================================
+model Review {
+  id        String    @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  title     String
+  comment   String?
+  
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([productId, userId])
+  @@map("reviews")
+}
+
+// ============================================
+// ADMIN USERS
+// ============================================
+model AdminUser {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      String    @default("VIEWER")
+  status    String    @default("ACTIVE")
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("admin_users")
+}
